@@ -1574,6 +1574,53 @@ DEFAULT_CONFIG = {
         "subagent_auto_approve": False,
     },
 
+    # Native named subagent wrapper — higher-level Pi-style lifecycle tools
+    # (`subagent_spawn`, `subagent_result`, `subagent_list`, `subagent_steer`).
+    # These defaults are profile-safe and can be overridden per project via
+    # `.hermes/subagents.yaml` in the current workspace.
+    "subagents": {
+        "max_concurrent_background": 4,
+        "default_type": "general-purpose",
+        "default_max_iterations": 50,
+        "unknown_type_policy": "error",  # "error" or "fallback"
+        "types": {
+            "general-purpose": {
+                "description": "General-purpose coding and research subagent.",
+                "toolsets": ["terminal", "file", "web"],
+                "prompt_mode": "append",
+                "default_background": False,
+                "readonly": False,
+                "worktree": False,
+                "role": "leaf",
+            },
+            "explore": {
+                "description": "Read-only exploration subagent for codebase inspection and research.",
+                "toolsets": ["terminal", "file", "web"],
+                "prompt_mode": "append",
+                "default_background": False,
+                "readonly": True,
+                "worktree": False,
+                "role": "leaf",
+            },
+            "plan": {
+                "description": "Read-only planning subagent that writes recommendations instead of changing files.",
+                "toolsets": ["terminal", "file", "web"],
+                "prompt_mode": "append",
+                "default_background": False,
+                "readonly": True,
+                "worktree": False,
+                "role": "leaf",
+            },
+        },
+        "worktrees": {
+            "enabled": False,
+            "branch_prefix": "hermes-subagent-",
+            "cleanup_orphans_on_start": False,
+            "base_dir": "",
+        },
+        "project_config_files": [".hermes/subagents.yaml", ".hermes/subagents.yml"],
+    },
+
     # Ephemeral prefill messages file — JSON list of {role, content} dicts
     # injected at the start of every API call for few-shot priming.
     # Never saved to sessions, logs, or trajectories.
@@ -3756,7 +3803,7 @@ _KNOWN_ROOT_KEYS = {
     "fallback_providers", "credential_pool_strategies", "toolsets",
     "agent", "terminal", "display", "compression", "delegation",
     "auxiliary", "custom_providers", "context", "memory", "gateway",
-    "sessions",
+    "sessions", "subagents",
 }
 
 # Valid fields inside a custom_providers list entry
