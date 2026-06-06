@@ -934,6 +934,7 @@ class TestToolRegistration:
             "attachments_fetch", "events_poll", "events_wait",
             "messages_send", "channels_list",
             "permissions_list_open", "permissions_respond",
+            "subagent_spawn", "subagent_result", "subagent_list", "subagent_steer",
         }
         assert expected == tool_names, f"Missing: {expected - tool_names}, Extra: {tool_names - expected}"
 

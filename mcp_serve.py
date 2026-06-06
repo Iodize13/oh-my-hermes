@@ -38,6 +38,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Dict, List, Optional
 
 logger = logging.getLogger("hermes.mcp_serve")
@@ -458,9 +459,10 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
     mcp = FastMCP(
         "hermes",
         instructions=(
-            "Hermes Agent messaging bridge. Use these tools to interact with "
-            "conversations across Telegram, Discord, Slack, WhatsApp, Signal, "
-            "Matrix, and other connected platforms."
+            "Hermes Agent messaging bridge and optional native subagent bridge. "
+            "Use these tools to interact with conversations across Telegram, "
+            "Discord, Slack, WhatsApp, Signal, Matrix, and other connected "
+            "platforms, or to inspect wrapper-managed subagents."
         ),
     )
 
@@ -855,6 +857,73 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
 
         result = bridge.respond_to_approval(id, decision)
         return json.dumps(result, indent=2)
+
+    # -- native subagent bridge --------------------------------------------
+
+    def _mcp_parent_agent() -> SimpleNamespace:
+        cwd = str(Path.cwd().resolve())
+        return SimpleNamespace(
+            terminal_cwd=cwd,
+            cwd=cwd,
+            enabled_toolsets=None,
+            valid_tool_names=[],
+            model="",
+            provider="",
+            base_url="",
+            api_key="",
+            api_mode="",
+            reasoning_config=None,
+            _fallback_chain=None,
+            acp_command=None,
+            acp_args=[],
+            session_id="mcp-server",
+            platform="mcp",
+            _delegate_depth=0,
+            _current_task_id=None,
+            _touch_activity=lambda *_a, **_kw: None,
+        )
+
+    @mcp.tool()
+    def subagent_spawn(
+        prompt: str,
+        type_name: str = "general-purpose",
+        context: Optional[str] = None,
+        background: bool = True,
+    ) -> str:
+        """Spawn a native Hermes wrapper-managed subagent via the shared service."""
+        if not prompt or not str(prompt).strip():
+            return json.dumps({"status": "error", "stage": "validation", "error": "prompt is required"})
+        from agent.subagents.service import get_subagent_service
+        from agent.subagents.types import SubagentSpawnRequest
+
+        result = get_subagent_service().spawn(
+            SubagentSpawnRequest(
+                prompt=str(prompt),
+                type_name=type_name or "general-purpose",
+                context=context,
+                background=background,
+            ),
+            _mcp_parent_agent(),
+        )
+        return json.dumps(result, indent=2)
+
+    @mcp.tool()
+    def subagent_result(child_id: str) -> str:
+        """Read status/result for a wrapper-managed subagent by child id."""
+        from agent.subagents.service import get_subagent_service
+        return json.dumps(get_subagent_service().result(child_id), indent=2)
+
+    @mcp.tool()
+    def subagent_list() -> str:
+        """List active and recently completed wrapper-managed subagents."""
+        from agent.subagents.service import get_subagent_service
+        return json.dumps(get_subagent_service().list(), indent=2)
+
+    @mcp.tool()
+    def subagent_steer(child_id: str, message: str) -> str:
+        """Queue a steering message for a running wrapper-managed subagent."""
+        from agent.subagents.service import get_subagent_service
+        return json.dumps(get_subagent_service().steer(child_id, message), indent=2)
 
     return mcp
 

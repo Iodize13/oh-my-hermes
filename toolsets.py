@@ -54,6 +54,8 @@ _HERMES_CORE_TOOLS = [
     "clarify",
     # Code execution + delegation
     "execute_code", "delegate_task",
+    # Native named subagent wrapper
+    "subagent_spawn", "subagent_result", "subagent_list", "subagent_steer",
     # Cronjob management
     "cronjob",
     # Cross-platform messaging (gated on gateway running via check_fn)
@@ -246,6 +248,12 @@ TOOLSETS = {
         "includes": []
     },
 
+    "subagents": {
+        "description": "Native named Hermes subagent wrapper: spawn, poll, list, and steer foreground/background children",
+        "tools": ["subagent_spawn", "subagent_result", "subagent_list", "subagent_steer"],
+        "includes": []
+    },
+
     # "honcho" toolset removed — Honcho is now a memory provider plugin.
     # Tools are injected via MemoryManager, not the toolset system.
 
@@ -359,6 +367,7 @@ TOOLSETS = {
             "todo", "memory",
             "session_search",
             "execute_code", "delegate_task",
+            "subagent_spawn", "subagent_result", "subagent_list", "subagent_steer",
         ],
         "includes": []
     },
@@ -387,6 +396,7 @@ TOOLSETS = {
             "session_search",
             # Code execution + delegation
             "execute_code", "delegate_task",
+            "subagent_spawn", "subagent_result", "subagent_list", "subagent_steer",
             # Cronjob management
             "cronjob",
             # Home Assistant smart home control (gated on HASS_TOKEN via check_fn)
