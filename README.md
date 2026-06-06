@@ -33,6 +33,7 @@ subagents:
   types:
     general-purpose:
       description: "General-purpose coding and research subagent."
+      model: openai-codex/gpt-5.4-mini
       toolsets: [terminal, file, web]
       prompt_mode: append
       default_background: false
@@ -42,6 +43,7 @@ subagents:
 
     explore:
       description: "Read-only exploration subagent for codebase inspection and research."
+      model: openai-codex/gpt-5.4-mini
       toolsets: [terminal, file, web]
       prompt_mode: append
       default_background: false
@@ -51,6 +53,7 @@ subagents:
 
     plan:
       description: "Read-only planning subagent that writes recommendations instead of changing files."
+      model: openai-codex/gpt-5.5
       toolsets: [terminal, file, web]
       prompt_mode: append
       default_background: false
@@ -60,6 +63,7 @@ subagents:
 
     code-review:
       description: "Review-only type that runs in an isolated worktree."
+      model: openai-codex/gpt-5.5
       toolsets: [terminal, file, web]
       prompt_mode: append
       default_background: false
